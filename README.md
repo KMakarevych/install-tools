@@ -1,79 +1,79 @@
 # Install Tools
 
-Bash-скрипт для автоматичної установки популярних DevOps інструментів у домашню директорію користувача.
+Bash script for automatic installation of popular DevOps tools into the user's home directory.
 
-## Встановлювані інструменти
+## Installed Tools
 
-- **OpenTofu** - відкрита альтернатива Terraform
-- **Talosctl** - CLI для управління Talos Linux
-- **Helm** - пакетний менеджер для Kubernetes
-- **Kubectl** - CLI для управління Kubernetes кластерами
+- **OpenTofu** - open-source Terraform alternative
+- **Talosctl** - CLI for managing Talos Linux
+- **Helm** - package manager for Kubernetes
+- **Kubectl** - CLI for managing Kubernetes clusters
 
-## Можливості
+## Features
 
-- Автоматичне визначення архітектури (amd64, arm64, arm)
-- Встановлення останніх стабільних версій
-- Налаштування bash completion для всіх інструментів
-- Додавання алясу `k` для `kubectl`
-- Установка в `~/.local/bin` (не потребує sudo)
+- Automatic architecture detection (amd64, arm64, arm)
+- Installation of latest stable versions
+- Bash completion configuration for all tools
+- Adding `k` alias for `kubectl`
+- Installation in `~/.local/bin` (no sudo required)
 
-## Вимоги
+## Requirements
 
-- **curl** - для завантаження файлів
-- **bash** - версія 4.0 або новіша
-- **tar** - для розпакування архівів
+- **curl** - for downloading files
+- **bash** - version 4.0 or newer
+- **tar** - for extracting archives
 
-## Використання
+## Usage
 
-### Швидка установка (віддалена)
+### Quick Installation (Remote)
 
-Встановлення безпосередньо з GitHub:
+Install directly from GitHub:
 
 ```bash
 curl https://raw.githubusercontent.com/KMakarevych/install-tools/refs/heads/main/script.sh | bash -
 ```
 
-### Локальна установка
+### Local Installation
 
-Якщо ви вже клонували репозиторій:
+If you have already cloned the repository:
 
 ```bash
 bash script.sh
 ```
 
-### Після установки
+### Post-Installation
 
-1. Додайте `~/.local/bin` до PATH (якщо ще не додано):
+1. Add `~/.local/bin` to PATH (if not already added):
 
 ```bash
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 ```
 
-2. Увімкніть bash completion:
+2. Enable bash completion:
 
 ```bash
 echo 'for f in ~/.local/share/bash-completion/completions/*; do source "$f"; done' >> ~/.bashrc
 ```
 
-3. Перезавантажте конфігурацію:
+3. Reload configuration:
 
 ```bash
 source ~/.bashrc
 ```
 
-## Структура директорій
+## Directory Structure
 
-- `~/.local/bin/` - виконувані файли
-- `~/.local/share/bash-completion/completions/` - файли автодоповнення
+- `~/.local/bin/` - executable files
+- `~/.local/share/bash-completion/completions/` - completion files
 
-## Підтримувані платформи
+## Supported Platforms
 
-- **ОС**: Linux, macOS
-- **Архітектури**: x86_64 (amd64), aarch64 (arm64), armv7l (arm)
+- **OS**: Linux, macOS
+- **Architectures**: x86_64 (amd64), aarch64 (arm64), armv7l (arm)
 
-## Перевірка версій
+## Version Check
 
-Після установки перевірте версії:
+After installation, check versions:
 
 ```bash
 tofu version
@@ -82,23 +82,23 @@ helm version
 kubectl version --client
 ```
 
-## Алясі
+## Aliases
 
-Скрипт автоматично налаштовує:
+The script automatically configures:
 
-- `k` - короткий алясь для `kubectl`
+- `k` - short alias for `kubectl`
 
-## Оновлення
+## Updates
 
-Для оновлення інструментів просто запустіть скрипт повторно:
+To update tools, simply run the script again:
 
 ```bash
 bash script.sh
 ```
 
-## Усунення неполадок
+## Troubleshooting
 
-### curl не знайдено
+### curl not found
 
 ```bash
 # Debian/Ubuntu
@@ -111,18 +111,18 @@ sudo dnf install curl
 sudo pacman -S curl
 ```
 
-### PATH не містить ~/.local/bin
+### PATH does not contain ~/.local/bin
 
-Додайте до вашого `~/.bashrc`:
+Add to your `~/.bashrc`:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-### Completion не працює
+### Completion not working
 
-Переконайтеся, що ви додали рядок для завантаження completion файлів у `~/.bashrc` і перезавантажили shell.
+Make sure you added the line to load completion files in `~/.bashrc` and reloaded the shell.
 
-## Ліцензія
+## License
 
-Цей скрипт є вільним програмним забезпеченням і може використовуватися без обмежень.
+This script is free software and can be used without restrictions.
