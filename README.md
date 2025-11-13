@@ -41,7 +41,38 @@ If you have already cloned the repository:
 bash script.sh
 ```
 
+### Excluding Tools
+
+You can exclude specific tools from installation using the `--exclude` parameter:
+
+```bash
+# Exclude single tool
+bash script.sh --exclude=talosctl
+
+# Exclude multiple tools
+bash script.sh --exclude=talosctl,helm
+
+# Remote installation with exclusions
+curl https://raw.githubusercontent.com/KMakarevych/install-tools/refs/heads/main/script.sh | bash -s -- --exclude=talosctl,helm
+```
+
+Available tools for exclusion:
+- `tofu` - OpenTofu
+- `talosctl` - Talosctl
+- `helm` - Helm
+- `kubectl` - Kubectl
+
+### Help
+
+Display usage information:
+
+```bash
+bash script.sh --help
+```
+
 ### Post-Installation
+
+#### For Bash Users
 
 1. Add `~/.local/bin` to PATH (if not already added):
 
@@ -59,6 +90,36 @@ echo 'for f in ~/.local/share/bash-completion/completions/*; do source "$f"; don
 
 ```bash
 source ~/.bashrc
+```
+
+#### For Fish Users
+
+1. Add `~/.local/bin` to PATH (if not already added):
+
+```fish
+fish_add_path ~/.local/bin
+```
+
+2. Enable fish completion for the tools:
+
+```fish
+# Create fish completion directory if it doesn't exist
+mkdir -p ~/.config/fish/completions
+
+# Generate and install completions for kubectl
+kubectl completion fish > ~/.config/fish/completions/kubectl.fish
+
+# Generate and install completions for helm
+helm completion fish > ~/.config/fish/completions/helm.fish
+
+# Add kubectl alias
+alias --save k=kubectl
+```
+
+3. Fish will automatically reload the configuration. If needed, start a new shell session or run:
+
+```fish
+exec fish
 ```
 
 ## Directory Structure

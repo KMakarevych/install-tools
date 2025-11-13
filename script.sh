@@ -38,6 +38,39 @@ OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 BIN_DIR="${HOME}/.local/bin"
 COMPLETION_DIR="${HOME}/.local/share/bash-completion/completions"
 
+# Parse arguments
+EXCLUDED_TOOLS=()
+for arg in "$@"; do
+    case $arg in
+        --exclude=*)
+            IFS=',' read -ra EXCLUDED_TOOLS <<< "${arg#*=}"
+            ;;
+        --help|-h)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --exclude=tool1,tool2  Exclude specific tools from installation"
+            echo "                         Available tools: tofu, talosctl, helm, kubectl"
+            echo "  --help, -h             Show this help message"
+            echo ""
+            echo "Example:"
+            echo "  $0 --exclude=talosctl,helm"
+            exit 0
+            ;;
+    esac
+done
+
+# Check if tool is excluded
+is_excluded() {
+    local tool=$1
+    for excluded in "${EXCLUDED_TOOLS[@]}"; do
+        if [[ "$excluded" == "$tool" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 # Create directories
 mkdir -p "$BIN_DIR" "$COMPLETION_DIR"
 
@@ -143,19 +176,44 @@ complete -o default -F __start_kubectl k"
 # ============================================
 main() {
     log_info "Starting DevOps tools installation..."
-    
+
     if ! command_exists curl; then
         log_error "curl not found. Install it: sudo apt install curl"
         exit 1
     fi
-    
-    install_tofu
-    install_talosctl
-    install_helm
-    install_kubectl
-    configure_kubectl_alias
-    
-    log_info "All tools installed in $BIN_DIR"
+
+    # Show excluded tools if any
+    if [ ${#EXCLUDED_TOOLS[@]} -gt 0 ]; then
+        log_warn "Excluding tools: ${EXCLUDED_TOOLS[*]}"
+    fi
+
+    # Install tools conditionally
+    if ! is_excluded "tofu"; then
+        install_tofu
+    else
+        log_info "Skipping OpenTofu (excluded)"
+    fi
+
+    if ! is_excluded "talosctl"; then
+        install_talosctl
+    else
+        log_info "Skipping Talosctl (excluded)"
+    fi
+
+    if ! is_excluded "helm"; then
+        install_helm
+    else
+        log_info "Skipping Helm (excluded)"
+    fi
+
+    if ! is_excluded "kubectl"; then
+        install_kubectl
+        configure_kubectl_alias
+    else
+        log_info "Skipping Kubectl (excluded)"
+    fi
+
+    log_info "Installation complete! Tools installed in $BIN_DIR"
     log_info "Completion files in $COMPLETION_DIR"
     echo ""
     log_warn "Add to ~/.bashrc to enable completions:"
