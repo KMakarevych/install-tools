@@ -41,6 +41,35 @@ If you have already cloned the repository:
 bash script.sh
 ```
 
+### Excluding Tools
+
+You can exclude specific tools from installation using the `--exclude` parameter:
+
+```bash
+# Exclude single tool
+bash script.sh --exclude=talosctl
+
+# Exclude multiple tools
+bash script.sh --exclude=talosctl,helm
+
+# Remote installation with exclusions
+curl https://raw.githubusercontent.com/KMakarevych/install-tools/refs/heads/main/script.sh | bash -s -- --exclude=talosctl,helm
+```
+
+Available tools for exclusion:
+- `tofu` - OpenTofu
+- `talosctl` - Talosctl
+- `helm` - Helm
+- `kubectl` - Kubectl
+
+### Help
+
+Display usage information:
+
+```bash
+bash script.sh --help
+```
+
 ### Post-Installation
 
 #### For Bash Users
