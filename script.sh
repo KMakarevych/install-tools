@@ -37,6 +37,8 @@ esac
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 BIN_DIR="${HOME}/.local/bin"
 COMPLETION_DIR="${HOME}/.local/share/bash-completion/completions"
+NPM_DIR="${HOME}/.local/npm"
+NPM_BIN_DIR="${NPM_DIR}/bin"
 
 # Parse arguments
 EXCLUDED_TOOLS=()
@@ -50,11 +52,12 @@ for arg in "$@"; do
             echo ""
             echo "Options:"
             echo "  --exclude=tool1,tool2  Exclude specific tools from installation"
-            echo "                         Available tools: tofu, talosctl, helm, kubectl"
+            echo "                         Available tools: tofu, talosctl, helm, kubectl, claude, gemini, qwen"
             echo "  --help, -h             Show this help message"
             echo ""
             echo "Example:"
             echo "  $0 --exclude=talosctl,helm"
+            echo "  $0 --exclude=claude,gemini,qwen  # Exclude all AI agents"
             exit 0
             ;;
     esac
@@ -69,6 +72,72 @@ is_excluded() {
         fi
     done
     return 1
+}
+
+# Configure npm to use home directory
+configure_npm() {
+    log_info "Configuring npm to use home directory..."
+    mkdir -p "$NPM_DIR" "$NPM_BIN_DIR"
+
+    npm config set prefix "$NPM_DIR"
+    log_info "npm configured to install global packages in $NPM_DIR"
+}
+
+# Add directory to PATH in bash configuration
+add_to_bash_path() {
+    local dir=$1
+    local bashrc="${HOME}/.bashrc"
+    local path_line="export PATH=\"${dir}:\$PATH\""
+
+    # Create .bashrc if it doesn't exist
+    touch "$bashrc"
+
+    # Check if PATH entry already exists
+    if grep -qF "$path_line" "$bashrc" 2>/dev/null; then
+        log_info "PATH already contains $dir in ~/.bashrc"
+        return 0
+    fi
+
+    # Check if similar PATH entry exists (with different formatting)
+    if grep -q "PATH.*${dir}" "$bashrc" 2>/dev/null; then
+        log_info "PATH already contains $dir in ~/.bashrc (different format)"
+        return 0
+    fi
+
+    # Add PATH entry
+    echo "" >> "$bashrc"
+    echo "# Added by install-tools script" >> "$bashrc"
+    echo "$path_line" >> "$bashrc"
+    log_info "Added $dir to PATH in ~/.bashrc"
+}
+
+# Add directory to PATH in fish configuration
+add_to_fish_path() {
+    local dir=$1
+    local fish_config="${HOME}/.config/fish/config.fish"
+    local fish_config_dir="${HOME}/.config/fish"
+
+    # Create fish config directory and file if they don't exist
+    mkdir -p "$fish_config_dir"
+    touch "$fish_config"
+
+    # Check if PATH entry already exists using fish_add_path
+    if grep -qF "fish_add_path $dir" "$fish_config" 2>/dev/null; then
+        log_info "PATH already contains $dir in fish config"
+        return 0
+    fi
+
+    # Check if PATH entry exists using set -gx PATH
+    if grep -q "set -gx PATH.*${dir}" "$fish_config" 2>/dev/null; then
+        log_info "PATH already contains $dir in fish config (different format)"
+        return 0
+    fi
+
+    # Add PATH entry using fish_add_path (preferred method)
+    echo "" >> "$fish_config"
+    echo "# Added by install-tools script" >> "$fish_config"
+    echo "fish_add_path $dir" >> "$fish_config"
+    log_info "Added $dir to PATH in fish config"
 }
 
 # Create directories
@@ -172,6 +241,49 @@ complete -o default -F __start_kubectl k"
 }
 
 # ============================================
+# AI Agents Installation
+# ============================================
+
+# Claude Code CLI
+install_claude() {
+    log_info "Installing Claude Code CLI..."
+
+    if ! command_exists npm; then
+        log_error "npm not found. Install Node.js and npm first"
+        return 1
+    fi
+
+    npm install -g @anthropic-ai/claude-code
+    log_info "Claude Code CLI installed"
+}
+
+# Gemini CLI
+install_gemini() {
+    log_info "Installing Gemini CLI..."
+
+    if ! command_exists npm; then
+        log_error "npm not found. Install Node.js and npm first"
+        return 1
+    fi
+
+    npm install -g @google/gemini-cli
+    log_info "Gemini CLI installed"
+}
+
+# Qwen Code CLI
+install_qwen() {
+    log_info "Installing Qwen Code CLI..."
+
+    if ! command_exists npm; then
+        log_error "npm not found. Install Node.js and npm first"
+        return 1
+    fi
+
+    npm install -g @qwen-code/qwen-code
+    log_info "Qwen Code CLI installed"
+}
+
+# ============================================
 # Main logic
 # ============================================
 main() {
@@ -213,8 +325,43 @@ main() {
         log_info "Skipping Kubectl (excluded)"
     fi
 
+    # Configure npm and install AI agents if npm is available
+    if command_exists npm; then
+        log_info "npm found, configuring for AI agents installation..."
+        configure_npm
+
+        # Add npm bin directory to PATH for both bash and fish
+        add_to_bash_path "$NPM_BIN_DIR"
+        add_to_fish_path "$NPM_BIN_DIR"
+
+        # Install AI agents conditionally
+        if ! is_excluded "claude"; then
+            install_claude
+        else
+            log_info "Skipping Claude Code CLI (excluded)"
+        fi
+
+        if ! is_excluded "gemini"; then
+            install_gemini
+        else
+            log_info "Skipping Gemini CLI (excluded)"
+        fi
+
+        if ! is_excluded "qwen"; then
+            install_qwen
+        else
+            log_info "Skipping Qwen Code CLI (excluded)"
+        fi
+    else
+        log_warn "npm not found. Skipping AI agents installation."
+        log_warn "Install Node.js and npm to enable AI agents: sudo apt install nodejs npm"
+    fi
+
     log_info "Installation complete! Tools installed in $BIN_DIR"
     log_info "Completion files in $COMPLETION_DIR"
+    if command_exists npm; then
+        log_info "AI agents installed in $NPM_BIN_DIR"
+    fi
     echo ""
     log_warn "Add to ~/.bashrc to enable completions:"
     echo "for f in ~/.local/share/bash-completion/completions/*; do source \"\$f\"; done"

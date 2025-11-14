@@ -1,13 +1,19 @@
 # Install Tools
 
-Bash script for automatic installation of popular DevOps tools into the user's home directory.
+Bash script for automatic installation of popular DevOps tools and AI agents into the user's home directory.
 
 ## Installed Tools
 
+### DevOps Tools
 - **OpenTofu** - open-source Terraform alternative
 - **Talosctl** - CLI for managing Talos Linux
 - **Helm** - package manager for Kubernetes
 - **Kubectl** - CLI for managing Kubernetes clusters
+
+### AI Agents (requires Node.js and npm)
+- **Claude Code CLI** - Anthropic's AI coding assistant
+- **Gemini CLI** - Google's AI agent for terminal
+- **Qwen Code CLI** - Alibaba's agentic coding tool
 
 ## Features
 
@@ -16,12 +22,20 @@ Bash script for automatic installation of popular DevOps tools into the user's h
 - Bash completion configuration for all tools
 - Adding `k` alias for `kubectl`
 - Installation in `~/.local/bin` (no sudo required)
+- Automatic npm configuration for home directory (no sudo required for AI agents)
+- Automatic PATH configuration for both bash and fish shells
+- Smart detection of existing PATH entries
 
 ## Requirements
 
+### Required for DevOps Tools
 - **curl** - for downloading files
 - **bash** - version 4.0 or newer
 - **tar** - for extracting archives
+
+### Optional for AI Agents
+- **Node.js** - version 18 or newer
+- **npm** - Node package manager
 
 ## Usage
 
@@ -61,6 +75,9 @@ Available tools for exclusion:
 - `talosctl` - Talosctl
 - `helm` - Helm
 - `kubectl` - Kubectl
+- `claude` - Claude Code CLI
+- `gemini` - Gemini CLI
+- `qwen` - Qwen Code CLI
 
 ### Help
 
@@ -124,8 +141,10 @@ exec fish
 
 ## Directory Structure
 
-- `~/.local/bin/` - executable files
+- `~/.local/bin/` - DevOps tool executable files
 - `~/.local/share/bash-completion/completions/` - completion files
+- `~/.local/npm/` - npm global packages directory
+- `~/.local/npm/bin/` - AI agents executable files
 
 ## Supported Platforms
 
@@ -136,11 +155,19 @@ exec fish
 
 After installation, check versions:
 
+### DevOps Tools
 ```bash
 tofu version
 talosctl version
 helm version
 kubectl version --client
+```
+
+### AI Agents
+```bash
+claude --version
+gemini --version
+qwen --version
 ```
 
 ## Aliases
@@ -157,6 +184,48 @@ To update tools, simply run the script again:
 bash script.sh
 ```
 
+## AI Agents Setup
+
+The script automatically installs AI agents if Node.js and npm are detected. If they are not installed, you'll see a warning message.
+
+### Installing Node.js and npm
+
+```bash
+# Debian/Ubuntu
+sudo apt install nodejs npm
+
+# Fedora/RHEL
+sudo dnf install nodejs npm
+
+# Arch Linux
+sudo pacman -S nodejs npm
+
+# macOS
+brew install node
+```
+
+### Using AI Agents
+
+After installation, the AI agents are available globally:
+
+```bash
+# Claude Code - Anthropic's AI coding assistant
+claude --help
+
+# Gemini CLI - Google's AI agent for terminal
+gemini --help
+
+# Qwen Code - Alibaba's agentic coding tool
+qwen --help
+```
+
+### npm Configuration
+
+The script automatically:
+- Configures npm to install global packages in `~/.local/npm` (no sudo required)
+- Adds `~/.local/npm/bin` to PATH in both bash and fish configurations
+- Checks for existing PATH entries to avoid duplicates
+
 ## Troubleshooting
 
 ### curl not found
@@ -172,12 +241,39 @@ sudo dnf install curl
 sudo pacman -S curl
 ```
 
-### PATH does not contain ~/.local/bin
+### npm not found
 
-Add to your `~/.bashrc`:
+If you want to install AI agents but don't have npm:
+
+```bash
+# Debian/Ubuntu
+sudo apt install nodejs npm
+
+# Fedora/RHEL
+sudo dnf install nodejs npm
+
+# Arch Linux
+sudo pacman -S nodejs npm
+```
+
+After installing npm, run the script again to install AI agents.
+
+### PATH does not contain ~/.local/bin or ~/.local/npm/bin
+
+The script automatically adds these directories to your shell configuration. If they're not working:
+
+For bash, add to your `~/.bashrc`:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/npm/bin:$PATH"
+```
+
+For fish, run:
+
+```fish
+fish_add_path ~/.local/bin
+fish_add_path ~/.local/npm/bin
 ```
 
 ### Completion not working
